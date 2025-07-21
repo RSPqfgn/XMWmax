@@ -1,7 +1,6 @@
-<div style="text-align: center;">
-  <img src="image/XMWmax-logo.png" alt="XMWmax Logo" style="display: block; margin: 0 auto; width: 200px;" />
-  <h1 style="text-align: center;">XMWmax</h1>
-  <p style="text-align: center;">「强大的小码王增强脚本」</p>
+<div align="center">
+  <img src="image/XMWmax-logo.png" alt="XMWmax Logo" width="200" />
+  <p>「强大的小码王增强脚本」</p>
 </div>
 
 **⚠本脚本目前处于测试阶段，可能存在一些问题，请谨慎使用！**
