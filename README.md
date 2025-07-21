@@ -1,5 +1,5 @@
 <div align="center">
-  ![XMWmax Logo](image/XMWmax-logo.png)
+  <img src="image/XMWmax-logo.png" alt="XMWmax Logo" style="display: block; margin: 0 auto;" />
   <h1>XMWmax</h1>
   「强大的小码王增强脚本」
 </div>
