@@ -1,6 +1,5 @@
 <div align="center">
-  <img src="image/XMWmax-logo.png" alt="XMWmax Logo" style="display: block; margin: 0 auto;" />
-  <h1>XMWmax</h1>
+  <img src="image/XMWmax-logo.png" alt="XMWmax Logo" style="display: block; margin: 0 auto; width: 200px;" />
   「强大的小码王增强脚本」
 </div>
 
