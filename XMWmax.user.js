@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         XMWmax
-// @version      0.0.1
+// @version      0.0.2
 // @description  强大的小码王增强脚本
 // @author       RSPqfgn
 // @match        https://world.xiaomawang.com/*
