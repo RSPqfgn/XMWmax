@@ -41,9 +41,9 @@ XMWmax 是一个可扩展的用户脚本平台，允许开发者创建插件来�
 |--------|------|--------|------|
 | `enabled` | Boolean | true | 插件默认是否启用 |
 
-### 示例插件
+### 示例插件（JavaScript对象格式）
 
-```javascript
+``javascript
 {
     name: '示例插件',
     version: '1.0.0',
@@ -55,6 +55,56 @@ XMWmax 是一个可扩展的用户脚本平台，允许开发者创建插件来�
     }
 }
 ```
+
+## 插件基本结构（JSON格式）
+
+当通过插件市场或从URL加载插件时，插件必须使用严格的JSON格式：
+
+```json
+{
+    "name": "示例插件",
+    "version": "1.0.0",
+    "author": "开发者",
+    "description": "这是一个示例插件，展示了插件的基本结构",
+    "enabled": true,
+    "init": "function() {\n    alert('示例插件已加载！');\n}"
+}
+```
+
+### JSON格式要求
+
+1. 所有键名必须使用双引号括起来
+2. 所有字符串值必须使用双引号
+3. 函数必须序列化为字符串格式
+4. 不允许尾随逗号
+5. 不允许注释
+
+### 格式转换示例
+
+**JSON 格式（推荐）：**
+```
+{
+    "name": "示例插件",
+    "version": "1.0.0",
+    "author": "开发者",
+    "description": "这是一个示例插件",
+    "init": "function() {\n    alert('示例插件已加载！');\n}"
+}
+```
+
+**JavaScript 对象格式（不适用于插件市场）：**
+```
+{
+    name: '示例插件',
+    version: '1.0.0',
+    author: '开发者',
+    description: '这是一个示例插件',
+    init: function() {
+        alert('示例插件已加载！');
+    }
+}
+```
+
 
 ## 插件开发最佳实践
 
@@ -68,7 +118,7 @@ XMWmax 是一个可扩展的用户脚本平台，允许开发者创建插件来�
 ### 2. 错误处理
 在 `init` 函数中使用 try-catch 块处理可能的错误：
 
-```javascript
+``javascript
 {
     name: '健壮的插件示例',
     version: '1.0.0',
@@ -87,7 +137,7 @@ XMWmax 是一个可扩展的用户脚本平台，允许开发者创建插件来�
 
 ### 3. 避免冲突
 - 避免修改 XMWmax 核心代码
-- 插件应保持独立性，不依赖其他特定插件
+- 插件应保持独立性，尽量不依赖其他特定插件
 - 使用唯一的 CSS 类名和 ID
 
 ### 4. 性能优化
@@ -156,7 +206,7 @@ XMWmax 支持用户自定义网站样式，通过"已安装样式"功能可以�
 以下是一些示例样式代码，可以直接使用或作为参考：
 
 #### 1. 修改文字颜色和字体
-```css
+```
 * {
     color: #333 !important;
     font-family: 'Microsoft YaHei', sans-serif !important;
@@ -164,7 +214,7 @@ XMWmax 支持用户自定义网站样式，通过"已安装样式"功能可以�
 ```
 
 #### 2. 修改链接颜色
-```css
+```
 a {
     color: #007bff !important;
 }
@@ -175,7 +225,7 @@ a:hover {
 ```
 
 #### 3. 隐藏特定元素
-```css
+```
 /* 隐藏页脚 */
 footer {
     display: none !important;
@@ -183,7 +233,7 @@ footer {
 ```
 
 #### 4. 修改按钮样式
-```css
+```
 button, .btn {
     background: linear-gradient(45deg, #007bff, #0056b3) !important;
     border: none !important;

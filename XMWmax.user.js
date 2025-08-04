@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         XMWmax
-// @version      0.0.2
+// @version      0.0.3
 // @description  强大的小码王增强脚本
 // @author       RSPqfgn
 // @match        https://world.xiaomawang.com/*
@@ -177,6 +177,34 @@
         }
         
         .xmwmax-plugin-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        /* 特别设置样式名称输入框的宽度 */
+        #style-name {
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        /* 插件市场样式 */
+        .xmwmax-market-actions {
+            margin-bottom: 15px;
+        }
+        
+        .xmwmax-market-status {
+            margin-bottom: 15px;
+            min-height: 24px;
+        }
+        
+        .xmwmax-market-status span {
+            color: #64748b;
+            font-size: 14px;
+        }
+        
+        /* 插件市场插件列表样式 */
+        .xmwmax-market-plugin-list {
             list-style: none;
             padding: 0;
             margin: 0;
@@ -619,18 +647,13 @@
         // 函数序列化方法
         serializeFunction: function(fn) {
             try {
-                if (!fn || typeof fn !== 'function') return { type: 'function', source: 'function(){}' };
+                if (!fn || typeof fn !== 'function') return 'function(){}';
                 
-                // 使用Base64编码函数字符串
-                const fnStr = btoa(unescape(encodeURIComponent(fn.toString())));
-                return { 
-                    type: 'function', 
-                    source: fnStr,
-                    encoded: true // 标记为已编码
-                };
+                // 直接存储函数字符串，不使用Base64编码
+                return fn.toString();
             } catch (e) {
                 console.error('函数序列化失败:', e);
-                return { type: 'function', source: 'function(){}' };
+                return 'function(){}';
             }
         },
         
@@ -638,41 +661,11 @@
         deserializeFunction: function(obj) {
             try {
                 if (typeof obj === 'function') return obj;
-                if (!obj || obj.source === 'function(){}') return function(){};
+                if (!obj || obj === 'function(){}') return function(){};
                 
-                // 处理函数字符串
-                let source = obj.source;
-                
-                // 如果是Base64编码的函数字符串，先解码
-                if (obj.encoded || !obj.source.startsWith('function')) {
-                    try {
-                        // 尝试多种解码方式
-                        try {
-                            source = decodeURIComponent(escape(atob(source)));
-                        } catch (e) {
-                            console.warn('标准解码失败，尝试备用解码方式:', e);
-                            // 备用解码方式
-                            source = decodeURIComponent(atob(source).split('').map(function(c) {
-                                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                            }).join(''));
-                        }
-                        
-                        // 确保函数格式正确
-                        if (!source.startsWith('(') && !source.startsWith('function')) {
-                            source = `(${source})`;
-                        }
-                    } catch (e) {
-                        console.error('Base64解码失败:', e);
-                        return function(){};
-                    }
-                }
-                
-                // 确保函数能够正确解析
-                const fn = new Function(`return ${source}`)();
+                // 直接解析函数字符串
+                const fn = new Function(`return ${obj}`)();
                 if (typeof fn !== 'function') throw new Error('反序列化结果不是函数');
-                
-                // 添加调试信息
-                console.log('成功解析函数:', source);
                 
                 return fn;
             } catch (e) {
@@ -705,13 +698,15 @@
                     
                     // 只有启用的插件才初始化
                     // 先反序列化init函数
-                    const initFunction = typeof plugin.init === 'object' ? 
+                    const initFunction = typeof plugin.init === 'string' ? 
                         XMWmax.deserializeFunction(plugin.init) : 
                         plugin.init;
                     
                     if (typeof initFunction === 'function') {
                         initFunction();
                         console.log(`插件 ${plugin.name} 初始化完成`);
+                    } else {
+                        console.error(`插件 ${plugin.name} 的init不是有效函数`);
                     }
                 } catch (e) {
                     console.error(`插件 ${plugin.name} 初始化失败:`, e);
@@ -788,7 +783,13 @@
         loadPluginFromUrl: function(url) {
             this.showNotification('正在加载插件...', 'info');
             fetch(url)
-                .then(response => response.text())
+                .then(response => {
+                    // 检查响应状态
+                    if (!response.ok) {
+                        throw new Error(`HTTP错误! 状态: ${response.status} ${response.statusText}`);
+                    }
+                    return response.text();
+                })
                 .then(code => {
                     const pluginObj = eval(`(${code})`);
                     
@@ -797,9 +798,32 @@
                         throw new Error('插件缺少必要字段（name, author, version, description）');
                     }
                     
-                    // 检查init函数是否存在
-                    if (!pluginObj.init || typeof pluginObj.init !== 'function') {
+                    // 检查init函数是否存在并处理不同格式
+                    if (!pluginObj.init) {
                         throw new Error('插件必须包含init函数');
+                    }
+                    
+                    let initFunction;
+                    if (typeof pluginObj.init === 'string') {
+                        // 如果init是字符串，尝试解析为函数
+                        try {
+                            // 检查是否是函数体还是完整函数定义
+                            if (pluginObj.init.trim().startsWith('function') || 
+                                pluginObj.init.trim().startsWith('(')) {
+                                // 完整函数定义
+                                initFunction = new Function(`return ${pluginObj.init}`)();
+                            } else {
+                                // 函数体
+                                initFunction = new Function(pluginObj.init);
+                            }
+                        } catch (e) {
+                            throw new Error('插件init字段字符串无法解析为有效函数: ' + e.message);
+                        }
+                    } else if (typeof pluginObj.init === 'function') {
+                        // 如果init已经是函数
+                        initFunction = pluginObj.init;
+                    } else {
+                        throw new Error('插件init字段必须是函数或可解析为函数的字符串');
                     }
                     
                     // 检查是否已存在同名同作者的插件
@@ -820,12 +844,18 @@
                     // 使用统一的函数反序列化方法
                     const plugin = {
                         ...pluginObj,
-                        init: XMWmax.deserializeFunction(pluginObj.init)
+                        init: initFunction
                     };
                     
                     // 立即执行一次init函数以验证有效性
                     if (plugin.enabled !== false && typeof plugin.init === 'function') {
-                        plugin.init();
+                        try {
+                            plugin.init();
+                            console.log(`插件 ${plugin.name} 测试运行成功`);
+                        } catch (e) {
+                            console.error(`插件 ${plugin.name} 测试运行失败:`, e);
+                            throw new Error(`插件运行出错: ${e.message}`);
+                        }
                     }
                     
                     // 添加插件到列表
@@ -906,6 +936,13 @@
                             <path d="M18.36 5.64l1.42-1.42"/>
                         </svg>
                     </button>
+                    <button class="xmwmax-sidebar-btn" data-tab="market" data-tooltip="插件市场">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="9" cy="21" r="1"></circle>
+                            <circle cx="20" cy="21" r="1"></circle>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                        </svg>
+                    </button>
                     <button class="xmwmax-sidebar-btn" data-tab="add" data-tooltip="添加插件">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10"/>
@@ -973,7 +1010,27 @@
                                 <button class="xmwmax-btn xmwmax-btn-primary xmwmax-load-btn">加载插件</button>
                             </div>
                         </div>
+                        <div class="xmwmax-tab-content" id="market">
+                            <div class="xmwmax-section">
+                                <h3 class="xmwmax-section-title">插件市场</h3>
+                                <div class="xmwmax-market-actions">
+                                    <button class="xmwmax-btn xmwmax-btn-primary xmwmax-refresh-market-btn">刷新插件列表</button>
+                                </div>
+                                <div class="xmwmax-market-status">
+                                    <span></span>
+                                </div>
+                                <ul class="xmwmax-market-plugin-list"></ul>
+                            </div>
+                        </div>
                         <div class="xmwmax-tab-content" id="settings">
+                            <div class="xmwmax-section">
+                                <h3 class="xmwmax-section-title">插件市场设置</h3>
+                                <div class="xmwmax-form-group">
+                                    <label for="plugin-repo-url">插件仓库地址</label>
+                                    <input type="text" id="plugin-repo-url" placeholder="输入插件仓库地址">
+                                </div>
+                                <button class="xmwmax-btn xmwmax-btn-primary xmwmax-save-repo-btn">保存设置</button>
+                            </div>
                             <div class="xmwmax-section">
                                 <h3 class="xmwmax-section-title">关于 XMWmax</h3>
                                 <div class="xmwmax-about-content">
@@ -1063,9 +1120,17 @@
                     if (typeof pluginObj.init === 'string') {
                         // 如果init是字符串，尝试解析为函数
                         try {
-                            initFunction = new Function(pluginObj.init);
+                            // 检查是否是函数体还是完整函数定义
+                            if (pluginObj.init.trim().startsWith('function') || 
+                                pluginObj.init.trim().startsWith('(')) {
+                                // 完整函数定义
+                                initFunction = new Function(`return ${pluginObj.init}`)();
+                            } else {
+                                // 函数体
+                                initFunction = new Function(pluginObj.init);
+                            }
                         } catch (e) {
-                            throw new Error('插件init字段字符串无法解析为有效函数');
+                            throw new Error('插件init字段字符串无法解析为有效函数: ' + e.message);
                         }
                     } else if (typeof pluginObj.init === 'function') {
                         // 如果init已经是函数
@@ -1096,7 +1161,13 @@
                     
                     // 立即执行一次init函数以验证有效性
                     if (plugin.enabled !== false && typeof plugin.init === 'function') {
-                        plugin.init();
+                        try {
+                            plugin.init();
+                            console.log(`插件 ${plugin.name} 测试运行成功`);
+                        } catch (e) {
+                            console.error(`插件 ${plugin.name} 测试运行失败:`, e);
+                            throw new Error(`插件运行出错: ${e.message}`);
+                        }
                     }
                     
                     // 添加插件到列表
@@ -1133,17 +1204,10 @@
             this.updateUI();
             
             // 填充脚本信息到关于页面
-            if (typeof GM_info !== 'undefined' && GM_info.script) {
-                const scriptInfo = GM_info.script;
-                document.getElementById('xmwmax-script-name').textContent = scriptInfo.name || 'XMWmax';
-                document.getElementById('xmwmax-script-version').textContent = scriptInfo.version || '0.0.1';
-                document.getElementById('xmwmax-script-author').textContent = scriptInfo.author || 'RSPqfgn';
-            } else {
-                // 如果GM_info不可用，显示获取失败
-                document.getElementById('xmwmax-script-name').textContent = '获取失败';
-                document.getElementById('xmwmax-script-version').textContent = '获取失败';
-                document.getElementById('xmwmax-script-author').textContent = '获取失败';
-            }
+            const scriptInfo = GM_info.script;
+            document.getElementById('xmwmax-script-name').textContent = scriptInfo.name;
+            document.getElementById('xmwmax-script-version').textContent = scriptInfo.version;
+            document.getElementById('xmwmax-script-author').textContent = scriptInfo.author;
             
             // 添加拖动功能
             this.addDragFunctionality(ui);
@@ -1200,7 +1264,7 @@
                             init: (() => {
                                 try {
                                     // 获取原始函数代码
-                                    const rawFunc = typeof plugin.init === 'object' ? 
+                                    const rawFunc = typeof plugin.init === 'string' ? 
                                         XMWmax.deserializeFunction(plugin.init) : 
                                         plugin.init;
                                     
@@ -1261,8 +1325,396 @@
                 this.showNotification(`样式 "${name}" 已添加`, 'success');
             });
             
-            // 初始化自定义样式
-            this.initCustomStyles();
+            // 添加插件市场事件监听
+            ui.querySelector('.xmwmax-refresh-market-btn').addEventListener('click', () => {
+                this.loadMarketPlugins();
+            });
+            
+            // 添加保存插件仓库设置事件监听
+            ui.querySelector('.xmwmax-save-repo-btn').addEventListener('click', () => {
+                const repoUrl = ui.querySelector('#plugin-repo-url').value.trim();
+                if (repoUrl) {
+                    GM_setValue('xmwmax_plugin_repo', repoUrl);
+                    this.showNotification('插件仓库地址已保存', 'success');
+                    // 重新加载插件市场
+                    this.loadMarketPlugins();
+                } else {
+                    this.showNotification('请输入有效的仓库地址', 'error');
+                }
+            });
+            
+            // 初始化插件仓库设置
+            const savedRepoUrl = GM_getValue('xmwmax_plugin_repo', 'https://api.github.com/repos/RSPqfgn/XMWmax-plugins/contents/plugins');
+            ui.querySelector('#plugin-repo-url').value = savedRepoUrl;
+            
+            // 初始化时加载插件市场
+            this.loadMarketPlugins();
+        },
+        
+        // 从GitHub加载插件市场插件列表
+        loadMarketPlugins: function() {
+            const marketStatus = this.ui.querySelector('.xmwmax-market-status span');
+            const pluginList = this.ui.querySelector('.xmwmax-market-plugin-list');
+            
+            // 更新状态显示
+            if (marketStatus) {
+                marketStatus.textContent = '正在加载插件列表...';
+            }
+            
+            // 清空插件列表
+            pluginList.innerHTML = '';
+            
+            // 获取保存的插件仓库地址
+            const repoUrl = GM_getValue('xmwmax_plugin_repo', 'https://api.github.com/repos/RSPqfgn/XMWmax-plugins/contents/plugins');
+            
+            // 检查URL是否有效
+            try {
+                new URL(repoUrl);
+            } catch (e) {
+                if (marketStatus) {
+                    marketStatus.textContent = '插件仓库地址无效';
+                }
+                const errorState = document.createElement('div');
+                errorState.className = 'xmwmax-empty-state';
+                errorState.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                    <h3>加载失败</h3>
+                    <p>插件仓库地址无效: ${repoUrl}</p>
+                    <p>请检查系统设置中的插件仓库地址</p>
+                `;
+                pluginList.appendChild(errorState);
+                return;
+            }
+            
+            fetch(repoUrl)
+                .then(response => {
+                    // 检查响应状态
+                    if (!response.ok) {
+                        throw new Error(`HTTP错误! 状态: ${response.status} ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(files => {
+                    // 添加调试信息
+                    console.log('GitHub API 返回的数据:', files);
+                    
+                    // 如果返回的是GitHub API错误信息
+                    if (files.message) {
+                        throw new Error(`GitHub API 错误: ${files.message}`);
+                    }
+                    
+                    // 确保返回的是数组
+                    if (!Array.isArray(files)) {
+                        throw new Error('返回的数据格式不正确，期望是一个数组');
+                    }
+                    
+                    // 过滤出JSON文件（插件定义文件）
+                    const pluginFiles = files.filter(file => 
+                        file.name && file.name.endsWith('.json') && file.type === 'file'
+                    );
+                    
+                    console.log('找到的插件文件:', pluginFiles);
+                    
+                    // 清空插件列表
+                    pluginList.innerHTML = '';
+                    
+                    if (pluginFiles.length === 0) {
+                        if (marketStatus) {
+                            marketStatus.textContent = '暂无插件';
+                        }
+                        const emptyState = document.createElement('div');
+                        emptyState.className = 'xmwmax-empty-state';
+                        emptyState.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                            </svg>
+                            <h3>暂无插件</h3>
+                            <p>插件市场暂无可用插件</p>
+                        `;
+                        pluginList.appendChild(emptyState);
+                        return;
+                    }
+                    
+                    if (marketStatus) {
+                        marketStatus.textContent = `找到 ${pluginFiles.length} 个插件`;
+                    }
+                    
+                    // 加载每个插件的信息
+                    let loadedCount = 0;
+                    let errorCount = 0;
+                    
+                    pluginFiles.forEach((file, index) => {
+                        // 使用setTimeout避免同时发起过多请求
+                        setTimeout(() => {
+                            this.loadMarketPluginInfo(file.download_url, file.name)
+                                .then(plugin => {
+                                    this.renderMarketPlugin(plugin, pluginList);
+                                    loadedCount++;
+                                    // 更新状态显示
+                                    if (marketStatus && loadedCount + errorCount === pluginFiles.length) {
+                                        marketStatus.textContent = `加载完成: ${loadedCount} 个插件${errorCount > 0 ? `, ${errorCount} 个失败` : ''}`;
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error(`加载插件 ${file.name} 失败:`, error);
+                                    this.showNotification(`加载插件 ${file.name} 失败: ${error.message}`, 'error');
+                                    errorCount++;
+                                    // 更新状态显示
+                                    if (marketStatus && loadedCount + errorCount === pluginFiles.length) {
+                                        marketStatus.textContent = `加载完成: ${loadedCount} 个插件${errorCount > 0 ? `, ${errorCount} 个失败` : ''}`;
+                                    }
+                                });
+                        }, index * 100); // 间隔100ms发起请求
+                    });
+                })
+                .catch(error => {
+                    pluginList.innerHTML = '';
+                    console.error('加载插件市场失败:', error);
+                    
+                    if (marketStatus) {
+                        marketStatus.textContent = '加载插件列表失败';
+                    }
+                    
+                    // 处理网络错误
+                    let errorMessage = error.message;
+                    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                        errorMessage = '网络错误: 无法访问插件仓库，请检查网络连接或仓库地址是否正确';
+                    }
+                    
+                    this.showNotification('加载插件市场失败: ' + errorMessage, 'error');
+                    
+                    // 显示错误信息
+                    const errorState = document.createElement('div');
+                    errorState.className = 'xmwmax-empty-state';
+                    errorState.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                        </svg>
+                        <h3>加载失败</h3>
+                        <p>${errorMessage}</p>
+                        <p>请检查插件仓库地址设置是否正确</p>
+                    `;
+                    pluginList.appendChild(errorState);
+                });
+        },
+        
+        // 显示空市场状态
+        showEmptyMarketState: function(pluginList, marketStatus) {
+            marketStatus.textContent = '暂无插件';
+            const emptyState = document.createElement('div');
+            emptyState.className = 'xmwmax-empty-state';
+            emptyState.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
+                <h3>暂无插件</h3>
+                <p>插件市场暂无可用插件</p>
+            `;
+            pluginList.appendChild(emptyState);
+        },
+        
+        // 加载单个插件信息
+        loadMarketPluginInfo: function(downloadUrl, fileName) {
+            // 检查URL是否有效
+            try {
+                new URL(downloadUrl);
+            } catch (e) {
+                throw new Error(`无效的URL: ${downloadUrl}`);
+            }
+            
+            return fetch(downloadUrl)
+                .then(response => {
+                    // 检查响应状态
+                    if (!response.ok) {
+                        throw new Error(`HTTP错误! 状态: ${response.status} ${response.statusText}`);
+                    }
+                    return response.text(); // 先获取文本内容
+                })
+                .then(text => {
+                    try {
+                        // 尝试解析JSON
+                        const plugin = JSON.parse(text);
+                        // 添加文件名信息（用于后续安装）
+                        plugin._fileName = fileName;
+                        plugin._downloadUrl = downloadUrl;
+                        return plugin;
+                    } catch (jsonError) {
+                        // 如果JSON解析失败，给出更详细的错误信息
+                        console.error(`插件文件 ${fileName} 内容:`, text);
+                        let errorMessage = `插件文件 ${fileName} JSON格式错误: ${jsonError.message}`;
+                        
+                        // 检查是否是常见的引号问题
+                        if (jsonError.message.includes('Expected property name') || 
+                            jsonError.message.includes('Invalid string') ||
+                            jsonError.message.includes('Unexpected token')) {
+                            errorMessage += '\n请确保所有键名和字符串值都使用双引号(")，并且函数已正确序列化为字符串。';
+                        }
+                        
+                        // 检查是否是尾随逗号问题
+                        if (jsonError.message.includes('after property') || 
+                            jsonError.message.includes('after element')) {
+                            errorMessage += '\n请检查JSON中是否存在尾随逗号。';
+                        }
+                        
+                        throw new Error(errorMessage);
+                    }
+                })
+                .catch(error => {
+                    // 处理网络错误
+                    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                        throw new Error(`网络错误: 无法访问 ${downloadUrl}，请检查网络连接或URL是否正确`);
+                    }
+                    throw error;
+                });
+        },
+        
+        // 渲染市场中的单个插件
+        renderMarketPlugin: function(plugin, container) {
+            const item = document.createElement('li');
+            item.className = 'xmwmax-plugin-card';
+            
+            // 检查插件是否已安装
+            const isInstalled = this.plugins.some(p => 
+                p.name === plugin.name && p.author === plugin.author
+            );
+            
+            item.innerHTML = `
+                <div class="xmwmax-plugin-info">
+                    <h3>${plugin.name}</h3>
+                    <div class="xmwmax-plugin-meta">
+                        <span><strong>版本:</strong> ${plugin.version}</span>
+                        <span><strong>作者:</strong> ${plugin.author}</span>
+                    </div>
+                    <p class="xmwmax-plugin-description">${plugin.description}</p>
+                    <div class="xmwmax-plugin-actions">
+                        ${isInstalled ? 
+                            `<button class="xmwmax-btn xmwmax-installed-btn" disabled>已安装</button>` : 
+                            `<button class="xmwmax-btn xmwmax-btn-primary xmwmax-install-btn" data-url="${plugin._downloadUrl}" data-filename="${plugin._fileName}">安装</button>`
+                        }
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(item);
+            
+            // 添加安装按钮事件监听器
+            if (!isInstalled) {
+                const installBtn = item.querySelector('.xmwmax-install-btn');
+                installBtn.addEventListener('click', (e) => {
+                    const url = e.target.dataset.url;
+                    const filename = e.target.dataset.filename;
+                    this.installMarketPlugin(url, filename);
+                });
+            }
+        },
+        
+        // 安装市场插件
+        installMarketPlugin: function(downloadUrl, fileName) {
+            this.showNotification(`正在安装插件 ${fileName}...`, 'info');
+            
+            fetch(downloadUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP错误! 状态: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(pluginObj => {
+                    // 检查必需字段
+                    if (!pluginObj.name || !pluginObj.author || !pluginObj.version || !pluginObj.description) {
+                        throw new Error('插件缺少必要字段（name, author, version, description）');
+                    }
+                    
+                    // 检查init函数是否存在并处理不同格式
+                    if (!pluginObj.init) {
+                        throw new Error('插件必须包含init函数');
+                    }
+                    
+                    let initFunction;
+                    if (typeof pluginObj.init === 'string') {
+                        // 如果init是字符串，尝试解析为函数
+                        try {
+                            // 检查是否是函数体还是完整函数定义
+                            if (pluginObj.init.trim().startsWith('function') || 
+                                pluginObj.init.trim().startsWith('(')) {
+                                // 完整函数定义
+                                initFunction = new Function(`return ${pluginObj.init}`)();
+                            } else {
+                                // 函数体
+                                initFunction = new Function(pluginObj.init);
+                            }
+                        } catch (e) {
+                            throw new Error('插件init字段字符串无法解析为有效函数: ' + e.message);
+                        }
+                    } else if (typeof pluginObj.init === 'function') {
+                        // 如果init已经是函数
+                        initFunction = pluginObj.init;
+                    } else {
+                        throw new Error('插件init字段必须是函数或可解析为函数的字符串');
+                    }
+                    
+                    // 检查是否已存在同名同作者的插件
+                    const existsIndex = this.plugins.findIndex(p => 
+                        p.name === pluginObj.name && p.author === pluginObj.author
+                    );
+                    
+                    // 如果存在同名插件，询问是否替换
+                    if (existsIndex !== -1) {
+                        if (!confirm(`已存在同名同作者的插件 "${pluginObj.name}"，是否替换原插件？`)) {
+                            this.showNotification('已取消安装插件', 'info');
+                            return; // 用户选择不替换，直接返回
+                        }
+                        // 用户选择替换，先移除原插件
+                        this.plugins.splice(existsIndex, 1);
+                    }
+                    
+                    // 构建插件对象
+                    const plugin = {
+                        ...pluginObj,
+                        init: initFunction
+                    };
+                    
+                    // 立即执行一次init函数以验证有效性
+                    if (plugin.enabled !== false && typeof plugin.init === 'function') {
+                        try {
+                            plugin.init();
+                            console.log(`插件 ${plugin.name} 测试运行成功`);
+                        } catch (e) {
+                            console.error(`插件 ${plugin.name} 测试运行失败:`, e);
+                            throw new Error(`插件运行出错: ${e.message}`);
+                        }
+                    }
+                    
+                    // 添加插件到列表
+                    this.plugins.push({
+                        ...plugin,
+                        init: this.serializeFunction(plugin.init),
+                        enabled: plugin.enabled !== undefined ? plugin.enabled : true
+                    });
+                    
+                    this.showNotification(`插件 ${plugin.name} 已${existsIndex !== -1 ? '替换' : '安装'}`, 'success');
+                    this.updateUI();
+                    
+                    // 保存插件到存储
+                    GM_setValue('xmwmax_plugins', this.plugins);
+                    
+                    // 更新市场显示
+                    this.loadMarketPlugins();
+                })
+                .catch(error => {
+                    console.error('插件安装失败:', error);
+                    this.showNotification('插件安装失败: ' + error.message, 'error');
+                });
         },
         
         // 更新UI
