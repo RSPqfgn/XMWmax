@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         XMWmax
-// @version      0.0.3
+// @version      0.0.4
 // @description  强大的小码王增强脚本
 // @author       RSPqfgn
 // @match        https://world.xiaomawang.com/*
@@ -1029,6 +1029,17 @@
                                     <label for="plugin-repo-url">插件仓库地址</label>
                                     <input type="text" id="plugin-repo-url" placeholder="输入插件仓库地址">
                                 </div>
+                                <div class="xmwmax-about-item">
+                                    <strong>CDN地址:</strong>
+                                    <a href="https://fastly.jsdelivr.net/gh/RSPqfgn/XMWmax-plugins@main/plugins/" target="_blank">https://fastly.jsdelivr.net/gh/RSPqfgn/XMWmax-plugins@main/plugins/</a>
+                                </div>
+                                <div class="xmwmax-about-item">
+                                    <strong>GitHub地址:</strong>
+                                    <a href="https://api.github.com/repos/RSPqfgn/XMWmax-plugins/contents/plugins" target="_blank">https://api.github.com/repos/RSPqfgn/XMWmax-plugins/contents/plugins</a>
+                                </div>
+                                <div class="xmwmax-about-item">
+                                    <span>推荐使用CDN地址以获得更快的访问速度</span>
+                                </div>
                                 <button class="xmwmax-btn xmwmax-btn-primary xmwmax-save-repo-btn">保存设置</button>
                             </div>
                             <div class="xmwmax-section">
@@ -1344,14 +1355,14 @@
             });
             
             // 初始化插件仓库设置
-            const savedRepoUrl = GM_getValue('xmwmax_plugin_repo', 'https://api.github.com/repos/RSPqfgn/XMWmax-plugins/contents/plugins');
+            const savedRepoUrl = GM_getValue('xmwmax_plugin_repo', 'https://fastly.jsdelivr.net/gh/RSPqfgn/XMWmax-plugins@main/plugins/');
             ui.querySelector('#plugin-repo-url').value = savedRepoUrl;
             
             // 初始化时加载插件市场
             this.loadMarketPlugins();
         },
         
-        // 从GitHub加载插件市场插件列表
+        // 从插件市场加载插件列表
         loadMarketPlugins: function() {
             const marketStatus = this.ui.querySelector('.xmwmax-market-status span');
             const pluginList = this.ui.querySelector('.xmwmax-market-plugin-list');
@@ -1365,31 +1376,140 @@
             pluginList.innerHTML = '';
             
             // 获取保存的插件仓库地址
-            const repoUrl = GM_getValue('xmwmax_plugin_repo', 'https://api.github.com/repos/RSPqfgn/XMWmax-plugins/contents/plugins');
+            const repoUrl = GM_getValue('xmwmax_plugin_repo', 'https://fastly.jsdelivr.net/gh/RSPqfgn/XMWmax-plugins@main/plugins/');
             
-            // 检查URL是否有效
-            try {
-                new URL(repoUrl);
-            } catch (e) {
-                if (marketStatus) {
-                    marketStatus.textContent = '插件仓库地址无效';
-                }
-                const errorState = document.createElement('div');
-                errorState.className = 'xmwmax-empty-state';
-                errorState.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="15" y1="9" x2="9" y2="15"></line>
-                        <line x1="9" y1="9" x2="15" y2="15"></line>
-                    </svg>
-                    <h3>加载失败</h3>
-                    <p>插件仓库地址无效: ${repoUrl}</p>
-                    <p>请检查系统设置中的插件仓库地址</p>
-                `;
-                pluginList.appendChild(errorState);
-                return;
+            // 检查是否使用CDN地址
+            const isCdnUrl = repoUrl.includes('jsdelivr.net');
+            const isGitHubApiUrl = repoUrl.includes('api.github.com');
+            
+            // 根据URL类型选择合适的加载方式
+            if (isCdnUrl) {
+                // 处理CDN地址
+                this.loadMarketPluginsFromCDN(repoUrl, marketStatus, pluginList);
+            } else if (isGitHubApiUrl) {
+                // 处理GitHub API地址
+                this.loadMarketPluginsFromGitHubAPI(repoUrl, marketStatus, pluginList);
+            } else {
+                // 尝试作为GitHub API处理
+                this.loadMarketPluginsFromGitHubAPI(repoUrl, marketStatus, pluginList);
+            }
+        },
+        
+        // 从CDN加载插件列表
+        loadMarketPluginsFromCDN: function(repoUrl, marketStatus, pluginList) {
+            // 确保URL以斜杠结尾
+            if (!repoUrl.endsWith('/')) {
+                repoUrl += '/';
             }
             
+            fetch(repoUrl)
+                .then(response => {
+                    // 检查响应状态
+                    if (!response.ok) {
+                        throw new Error(`HTTP错误! 状态: ${response.status} ${response.statusText}`);
+                    }
+                    return response.text();
+                })
+                .then(htmlText => {
+                    // 创建一个临时的DOM元素来解析HTML
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(htmlText, 'text/html');
+                    
+                    // 查找所有JSON文件链接
+                    const links = doc.querySelectorAll('a[href$=".json"]');
+                    const pluginFiles = Array.from(links).map(link => {
+                        const fileName = link.textContent.trim();
+                        const downloadUrl = new URL(link.getAttribute('href'), repoUrl).href;
+                        return { name: fileName, download_url: downloadUrl };
+                    });
+                    
+                    // 过滤出插件文件（排除样式文件）
+                    const pluginFilesFiltered = pluginFiles.filter(file => 
+                        file.name && file.name.endsWith('.json') && !file.name.endsWith('.style.json')
+                    );
+                    
+                    const styleFilesFiltered = pluginFiles.filter(file => 
+                        file.name && file.name.endsWith('.style.json')
+                    );
+                    
+                    // 合并插件和样式文件
+                    const allFiles = [...pluginFilesFiltered, ...styleFilesFiltered];
+                    
+                    if (allFiles.length === 0) {
+                        if (marketStatus) {
+                            marketStatus.textContent = '暂无插件';
+                        }
+                        this.showEmptyMarketState(pluginList, marketStatus);
+                        return;
+                    }
+                    
+                    if (marketStatus) {
+                        marketStatus.textContent = `找到 ${allFiles.length} 个插件`;
+                    }
+                    
+                    // 加载每个插件的信息
+                    let loadedCount = 0;
+                    let errorCount = 0;
+                    
+                    allFiles.forEach((file, index) => {
+                        // 使用setTimeout避免同时发起过多请求
+                        setTimeout(() => {
+                            this.loadMarketPluginInfo(file.download_url, file.name)
+                                .then(plugin => {
+                                    this.renderMarketPlugin(plugin, pluginList);
+                                    loadedCount++;
+                                    // 更新状态显示
+                                    if (marketStatus && loadedCount + errorCount === allFiles.length) {
+                                        marketStatus.textContent = `加载完成: ${loadedCount} 个插件${errorCount > 0 ? `, ${errorCount} 个失败` : ''}`;
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error(`加载插件 ${file.name} 失败:`, error);
+                                    this.showNotification(`加载插件 ${file.name} 失败: ${error.message}`, 'error');
+                                    errorCount++;
+                                    // 更新状态显示
+                                    if (marketStatus && loadedCount + errorCount === allFiles.length) {
+                                        marketStatus.textContent = `加载完成: ${loadedCount} 个插件${errorCount > 0 ? `, ${errorCount} 个失败` : ''}`;
+                                    }
+                                });
+                        }, index * 100); // 间隔100ms发起请求
+                    });
+                })
+                .catch(error => {
+                    pluginList.innerHTML = '';
+                    console.error('加载插件市场失败:', error);
+                    
+                    if (marketStatus) {
+                        marketStatus.textContent = '加载插件列表失败';
+                    }
+                    
+                    // 处理网络错误
+                    let errorMessage = error.message;
+                    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                        errorMessage = '网络错误: 无法访问插件仓库，请检查网络连接或仓库地址是否正确';
+                    }
+                    
+                    this.showNotification('加载插件市场失败: ' + errorMessage, 'error');
+                    
+                    // 显示错误信息
+                    const errorState = document.createElement('div');
+                    errorState.className = 'xmwmax-empty-state';
+                    errorState.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                        </svg>
+                        <h3>加载失败</h3>
+                        <p>${errorMessage}</p>
+                        <p>请检查插件仓库地址设置是否正确</p>
+                    `;
+                    pluginList.appendChild(errorState);
+                });
+        },
+        
+        // 从GitHub API加载插件列表
+        loadMarketPluginsFromGitHubAPI: function(repoUrl, marketStatus, pluginList) {
             fetch(repoUrl)
                 .then(response => {
                     // 检查响应状态
@@ -1426,18 +1546,7 @@
                         if (marketStatus) {
                             marketStatus.textContent = '暂无插件';
                         }
-                        const emptyState = document.createElement('div');
-                        emptyState.className = 'xmwmax-empty-state';
-                        emptyState.innerHTML = `
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="15" y1="9" x2="9" y2="15"></line>
-                                <line x1="9" y1="9" x2="15" y2="15"></line>
-                            </svg>
-                            <h3>暂无插件</h3>
-                            <p>插件市场暂无可用插件</p>
-                        `;
-                        pluginList.appendChild(emptyState);
+                        this.showEmptyMarketState(pluginList, marketStatus);
                         return;
                     }
                     
@@ -1523,8 +1632,16 @@
             pluginList.appendChild(emptyState);
         },
         
+        // CDN地址（可根据实际情况修改）
+        cdnAddress: 'https://fastly.jsdelivr.net/gh/RSPqfgn/XMWmax-plugins@main/plugins/',
+        
         // 加载单个插件信息
         loadMarketPluginInfo: function(downloadUrl, fileName) {
+            // 如果提供的是相对路径，使用CDN地址补全
+            if (downloadUrl && !downloadUrl.includes('://')) {
+                downloadUrl = this.cdnAddress + downloadUrl;
+            }
+            
             // 检查URL是否有效
             try {
                 new URL(downloadUrl);
@@ -1576,6 +1693,14 @@
                     }
                     throw error;
                 });
+        },
+        
+        // 设置CDN地址
+        setCdnAddress: function(address) {
+            if (address && !address.endsWith('/')) {
+                address += '/';
+            }
+            this.cdnAddress = address;
         },
         
         // 渲染市场中的单个插件
