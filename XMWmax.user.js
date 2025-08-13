@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         XMWmax
-// @version      0.0.4
+// @version      0.0.5
 // @description  强大的小码王增强脚本
 // @author       RSPqfgn
 // @match        https://world.xiaomawang.com/*
@@ -328,6 +328,7 @@
             border-bottom: 1px solid #e2e8f0;
         }
         
+        /* 表单组样式 */
         .xmwmax-form-group {
             margin-bottom: 20px;
         }
@@ -363,10 +364,63 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
         }
         
+        /* 插件转换器文本区域样式 */
+        .xmwmax-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 200px;
+            box-sizing: border-box;
+        }
+        
+        .xmwmax-textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        
+        /* 表单操作按钮容器 */
+        .xmwmax-form-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
         /* 特别设置样式名称输入框的宽度 */
         #style-name {
             width: 100%;
             max-width: 500px;
+        }
+        
+        /* 搜索框样式 */
+        .xmwmax-search-container {
+            margin-bottom: 15px;
+        }
+        
+        .xmwmax-search-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        .xmwmax-search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        
+        /* 插件卡片隐藏状态 */
+        .xmwmax-plugin-card.hidden {
+            display: none;
         }
         
         /* 关于页面样式 */
@@ -381,6 +435,7 @@
             background-color: #f8fafc;
             display: flex;
             flex-wrap: wrap;
+            align-items: center;
         }
         
         .xmwmax-about-item strong {
@@ -401,6 +456,147 @@
             color: #3b82f6;
         }
         
+        /* 开发者选项开关美化 */
+        .xmwmax-developer-toggle {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-left: auto;
+        }
+        
+        .xmwmax-toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .xmwmax-toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .xmwmax-toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .xmwmax-toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        .xmwmax-toggle-switch input:checked + .xmwmax-toggle-slider {
+            background-color: #3b82f6;
+        }
+        
+        .xmwmax-toggle-switch input:checked + .xmwmax-toggle-slider:before {
+            transform: translateX(26px);
+        }
+        
+        /* 设置项样式 */
+        .xmwmax-setting-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #f8fafc;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .xmwmax-setting-item strong {
+            width: 100px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .xmwmax-setting-item span,
+        .xmwmax-setting-item a {
+            flex: 1;
+            color: #334155;
+            text-decoration: none;
+        }
+        
+        .xmwmax-setting-item a:hover {
+            text-decoration: underline;
+            color: #3b82f6;
+        }
+        
+        /* 设置项开关美化 */
+        .xmwmax-setting-toggle {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-left: auto;
+        }
+        
+        .xmwmax-toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .xmwmax-toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .xmwmax-toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .xmwmax-toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        .xmwmax-toggle-switch input:checked + .xmwmax-toggle-slider {
+            background-color: #3b82f6;
+        }
+        
+        .xmwmax-toggle-switch input:checked + .xmwmax-toggle-slider:before {
+            transform: translateX(26px);
+        }
+        
+        #developer-mode-status {
+            min-width: 40px;
+            font-weight: 500;
+        }
+        
+        /* 设置项样式 */
         .xmwmax-btn {
             padding: 10px 20px;
             border-radius: 6px;
@@ -488,6 +684,7 @@
             background: #ef4444;
         }
     `;
+    document.head.appendChild(style);
     document.head.appendChild(style);
 
     // 插件系统核心
@@ -779,6 +976,106 @@
             }
         },
         
+        // 从GitHub API加载插件列表
+        loadMarketPluginsFromGitHubAPI: function(repoUrl, marketStatus, pluginList) {
+            // 添加超时功能的fetch
+            Promise.race([
+                fetch(repoUrl),
+                new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('请求超时: 无法访问插件仓库')), 60000)
+                )
+            ])
+                .then(response => {
+                    // 检查响应状态
+                    if (!response.ok) {
+                        throw new Error(`HTTP错误! 状态: ${response.status} ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(files => {
+                    files.forEach(file => {
+                        if (file.name.endsWith('.js')) {
+                            pluginList.push(file.download_url);
+                        }
+                    });
+                    
+                    // 更新市场状态
+                    marketStatus.textContent = `已加载 ${pluginList.length} 个插件`;
+                })
+                .catch(error => {
+                    console.error('加载插件时出错:', error);
+                    marketStatus.textContent = '加载插件时出错';
+                });
+        },
+        // 从URL加载插件
+        loadPluginFromUrl: function(url) {
+            this.showNotification('正在加载插件...', 'info');
+            
+            // 添加超时功能的fetch
+            Promise.race([
+                fetch(url),
+                new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('请求超时: 无法加载插件')), 60000)
+                )
+            ])
+                .then(response => {
+                    // 检查响应状态
+                    if (!response.ok) {
+                        throw new Error(`HTTP错误! 状态: ${response.status} ${response.statusText}`);
+                    }
+                    return response.text();
+                })
+                .then(code => {
+                    this.showNotification('插件加载成功', 'success');
+                    this.executePlugin(code);
+                })
+                .catch(error => {
+                    console.error('加载插件时出错:', error);
+                    this.showNotification('加载插件时出错', 'error');
+                });
+        },
+        // 从CDN加载插件列表
+        loadMarketPluginsFromCDN: function(repoUrl, marketStatus, pluginList) {
+            // 确保URL以斜杠结尾
+            if (!repoUrl.endsWith('/')) {
+                repoUrl += '/';
+            }
+            
+            // 添加超时功能的fetch
+            Promise.race([
+                fetch(repoUrl),
+                new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('请求超时: 无法访问插件仓库')), 60000)
+                )
+            ])
+                .then(response => {
+                    // 检查响应状态
+                    if (!response.ok) {
+                        throw new Error(`HTTP错误! 状态: ${response.status} ${response.statusText}`);
+                    }
+                    return response.text();
+                })
+                .then(htmlText => {
+                    // 解析HTML
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(htmlText, 'text/html');
+                    const pluginElements = doc.querySelectorAll('a');
+                    pluginElements.forEach(element => {
+                        const pluginUrl = element.href;
+                        if (pluginUrl.endsWith('.js')) {
+                            pluginList.push(pluginUrl);
+                        }
+                    });
+                    
+                    // 更新市场状态
+                    marketStatus.textContent = `已加载 ${pluginList.length} 个插件`;
+                })
+                .catch(error => {
+                    console.error('加载插件列表失败:', error);
+                    marketStatus.textContent = '加载插件列表失败';
+                });
+        },
+        
         // 从URL加载插件
         loadPluginFromUrl: function(url) {
             this.showNotification('正在加载插件...', 'info');
@@ -943,11 +1240,9 @@
                             <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                         </svg>
                     </button>
-                    <button class="xmwmax-sidebar-btn" data-tab="add" data-tooltip="添加插件">
+                    <button class="xmwmax-sidebar-btn" data-tab="add" data-tooltip="开发者选项">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"/>
-                            <line x1="12" y1="8" x2="12" y2="16"/>
-                            <line x1="8" y1="12" x2="16" y2="12"/>
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
                         </svg>
                     </button>
                     <button class="xmwmax-sidebar-btn" data-tab="settings" data-tooltip="系统设置">
@@ -971,6 +1266,9 @@
                         <div class="xmwmax-tab-content active" id="installed-plugins">
                             <div class="xmwmax-section">
                                 <h3 class="xmwmax-section-title">已安装插件</h3>
+                                <div class="xmwmax-search-container">
+                                    <input type="text" class="xmwmax-search-input" id="installed-plugins-search" placeholder="搜索插件名、作者或描述...">
+                                </div>
                                 <ul class="xmwmax-plugin-list"></ul>
                             </div>
                         </div>
@@ -994,27 +1292,52 @@
                         </div>
                         <div class="xmwmax-tab-content" id="add">
                             <div class="xmwmax-section">
-                                <h3 class="xmwmax-section-title">手动添加插件</h3>
+                                <h3 class="xmwmax-section-title">导入插件</h3>
                                 <div class="xmwmax-form-group">
                                     <label for="plugin-code">插件代码</label>
                                     <textarea id="plugin-code" placeholder="粘贴插件代码..."></textarea>
                                 </div>
-                                <button class="xmwmax-btn xmwmax-btn-primary xmwmax-add-btn">添加插件</button>
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="xmwmax-btn xmwmax-btn-primary xmwmax-add-btn">添加插件</button>
+                                    <button class="xmwmax-btn xmwmax-btn-primary xmwmax-template-btn">插件模板</button>
+                                </div>
                             </div>
+                            
                             <div class="xmwmax-section">
-                                <h3 class="xmwmax-section-title">从URL添加</h3>
+                                <h3 class="xmwmax-section-title">插件格式转换</h3>
+                                <div class="xmwmax-form-group">
+                                    <label for="plugin-input">输入插件代码</label>
+                                    <textarea id="plugin-input" placeholder="在此粘贴JS或JSON格式的插件代码..." class="xmwmax-textarea"></textarea>
+                                </div>
+                                <div class="xmwmax-form-actions">
+                                    <button class="xmwmax-btn xmwmax-btn-primary" id="convert-to-json">转换为JSON格式</button>
+                                    <button class="xmwmax-btn xmwmax-btn-primary" id="convert-to-js">转换为JS格式</button>
+                                </div>
+                                <div class="xmwmax-form-group">
+                                    <label for="plugin-output">输出结果</label>
+                                    <textarea id="plugin-output" placeholder="转换后的代码将显示在这里..." class="xmwmax-textarea" readonly></textarea>
+                                </div>
+                                <div class="xmwmax-form-actions">
+                                    <button class="xmwmax-btn" id="copy-plugin-output">复制结果</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="xmwmax-tab-content" id="market">
+                            <div class="xmwmax-section">
+                                <h3 class="xmwmax-section-title">从URL添加插件</h3>
                                 <div class="xmwmax-form-group">
                                     <label for="plugin-url">插件URL</label>
                                     <input type="text" id="plugin-url" placeholder="输入插件URL...">
                                 </div>
                                 <button class="xmwmax-btn xmwmax-btn-primary xmwmax-load-btn">加载插件</button>
                             </div>
-                        </div>
-                        <div class="xmwmax-tab-content" id="market">
                             <div class="xmwmax-section">
                                 <h3 class="xmwmax-section-title">插件市场</h3>
                                 <div class="xmwmax-market-actions">
                                     <button class="xmwmax-btn xmwmax-btn-primary xmwmax-refresh-market-btn">刷新插件列表</button>
+                                </div>
+                                <div class="xmwmax-search-container">
+                                    <input type="text" class="xmwmax-search-input" id="market-plugins-search" placeholder="搜索插件名、作者或描述...">
                                 </div>
                                 <div class="xmwmax-market-status">
                                     <span></span>
@@ -1064,6 +1387,15 @@
                                     <div class="xmwmax-about-item">
                                         <strong>功能描述:</strong>
                                         <span>强大的小码王增强脚本，支持插件化扩展和自定义样式</span>
+                                    </div>
+                                    <div class="xmwmax-about-item">
+                                        <strong>开发者选项:</strong>
+                                        <div class="xmwmax-developer-toggle">
+                                            <label class="xmwmax-toggle-switch">
+                                                <input type="checkbox" id="developer-mode-toggle">
+                                                <span class="xmwmax-toggle-slider"></span>
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1210,6 +1542,23 @@
                 ui.querySelector('#plugin-url').value = '';
             });
             
+            // 插件模板按钮
+            ui.querySelector('.xmwmax-template-btn').addEventListener('click', () => {
+                const pluginCodeTextarea = ui.querySelector('#plugin-code');
+                if (pluginCodeTextarea) {
+                    const template = `{
+    "name": "插件名",
+    "version": "1.0.0",
+    "author": "你的名字",
+    "description": "插件简介",
+    "enabled": true,
+    "init": "function() {\\n    alert('Hello XMWmax!');\\n}"
+}`;
+                    pluginCodeTextarea.value = template;
+                    this.showNotification('插件模板已加载到编辑器', 'success');
+                }
+            });
+            
             document.body.appendChild(ui);
             this.ui = ui;
             this.updateUI();
@@ -1220,8 +1569,37 @@
             document.getElementById('xmwmax-script-version').textContent = scriptInfo.version;
             document.getElementById('xmwmax-script-author').textContent = scriptInfo.author;
             
+            // 初始化开发者选项开关状态
+            const isDeveloperMode = GM_getValue('xmwmax_developer_mode', false);
+            const developerModeToggle = ui.querySelector('#developer-mode-toggle');
+            const developerButton = ui.querySelector('.xmwmax-sidebar-btn[data-tab="add"]');
+            
+            developerModeToggle.checked = isDeveloperMode;
+            developerButton.style.display = isDeveloperMode ? 'flex' : 'none';
+            
+            // 添加开发者选项开关事件监听
+            developerModeToggle.addEventListener('change', (e) => {
+                const isEnabled = e.target.checked;
+                GM_setValue('xmwmax_developer_mode', isEnabled);
+                developerButton.style.display = isEnabled ? 'flex' : 'none';
+                
+                this.showNotification(
+                    `开发者选项已${isEnabled ? '启用' : '禁用'}`, 
+                    'success'
+                );
+                
+                // 更新插件编辑按钮的显示状态
+                const editButtons = ui.querySelectorAll('.xmwmax-edit-btn');
+                editButtons.forEach(button => {
+                    button.style.display = isEnabled ? 'block' : 'none';
+                });
+            });
+            
             // 添加拖动功能
             this.addDragFunctionality(ui);
+            
+            // 添加插件格式转换功能
+            this.addPluginConverterFunctionality(ui);
             
             // 添加插件管理事件
             ui.addEventListener('click', (e) => {
@@ -1364,19 +1742,19 @@
         
         // 从插件市场加载插件列表
         loadMarketPlugins: function() {
-            const marketStatus = this.ui.querySelector('.xmwmax-market-status span');
+            if (!this.ui) return;
+            
             const pluginList = this.ui.querySelector('.xmwmax-market-plugin-list');
+            const marketStatus = this.ui.querySelector('.xmwmax-market-status span');
             
-            // 更新状态显示
-            if (marketStatus) {
-                marketStatus.textContent = '正在加载插件列表...';
-            }
-            
-            // 清空插件列表
+            // 清空现有列表
             pluginList.innerHTML = '';
             
-            // 获取保存的插件仓库地址
-            const repoUrl = GM_getValue('xmwmax_plugin_repo', 'https://fastly.jsdelivr.net/gh/RSPqfgn/XMWmax-plugins@main/plugins/');
+            // 显示加载状态
+            marketStatus.textContent = '加载中...';
+            
+            // 获取仓库URL
+            let repoUrl = GM_getValue('xmwmax_plugin_repo', 'https://fastly.jsdelivr.net/gh/RSPqfgn/XMWmax-plugins@main/plugins/');
             
             // 检查是否使用CDN地址
             const isCdnUrl = repoUrl.includes('jsdelivr.net');
@@ -1440,6 +1818,8 @@
                             marketStatus.textContent = '暂无插件';
                         }
                         this.showEmptyMarketState(pluginList, marketStatus);
+                        // 添加插件市场搜索功能（即使没有插件也要添加，以便用户输入时不会出错）
+                        this.addMarketSearchFunctionality();
                         return;
                     }
                     
@@ -1461,6 +1841,8 @@
                                     // 更新状态显示
                                     if (marketStatus && loadedCount + errorCount === allFiles.length) {
                                         marketStatus.textContent = `加载完成: ${loadedCount} 个插件${errorCount > 0 ? `, ${errorCount} 个失败` : ''}`;
+                                        // 添加插件市场搜索功能
+                                        this.addMarketSearchFunctionality();
                                     }
                                 })
                                 .catch(error => {
@@ -1470,6 +1852,8 @@
                                     // 更新状态显示
                                     if (marketStatus && loadedCount + errorCount === allFiles.length) {
                                         marketStatus.textContent = `加载完成: ${loadedCount} 个插件${errorCount > 0 ? `, ${errorCount} 个失败` : ''}`;
+                                        // 添加插件市场搜索功能
+                                        this.addMarketSearchFunctionality();
                                     }
                                 });
                         }, index * 100); // 间隔100ms发起请求
@@ -1478,20 +1862,8 @@
                 .catch(error => {
                     pluginList.innerHTML = '';
                     console.error('加载插件市场失败:', error);
+                    this.showNotification('加载插件市场失败: ' + error.message, 'error');
                     
-                    if (marketStatus) {
-                        marketStatus.textContent = '加载插件列表失败';
-                    }
-                    
-                    // 处理网络错误
-                    let errorMessage = error.message;
-                    if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                        errorMessage = '网络错误: 无法访问插件仓库，请检查网络连接或仓库地址是否正确';
-                    }
-                    
-                    this.showNotification('加载插件市场失败: ' + errorMessage, 'error');
-                    
-                    // 显示错误信息
                     const errorState = document.createElement('div');
                     errorState.className = 'xmwmax-empty-state';
                     errorState.innerHTML = `
@@ -1501,10 +1873,11 @@
                             <line x1="9" y1="9" x2="15" y2="15"></line>
                         </svg>
                         <h3>加载失败</h3>
-                        <p>${errorMessage}</p>
-                        <p>请检查插件仓库地址设置是否正确</p>
+                        <p>${error.message}</p>
                     `;
                     pluginList.appendChild(errorState);
+                    // 添加插件市场搜索功能（即使加载失败也要添加，以便用户输入时不会出错）
+                    this.addMarketSearchFunctionality();
                 });
         },
         
@@ -1547,6 +1920,8 @@
                             marketStatus.textContent = '暂无插件';
                         }
                         this.showEmptyMarketState(pluginList, marketStatus);
+                        // 添加插件市场搜索功能（即使没有插件也要添加，以便用户输入时不会出错）
+                        this.addMarketSearchFunctionality();
                         return;
                     }
                     
@@ -1568,6 +1943,8 @@
                                     // 更新状态显示
                                     if (marketStatus && loadedCount + errorCount === pluginFiles.length) {
                                         marketStatus.textContent = `加载完成: ${loadedCount} 个插件${errorCount > 0 ? `, ${errorCount} 个失败` : ''}`;
+                                        // 添加插件市场搜索功能
+                                        this.addMarketSearchFunctionality();
                                     }
                                 })
                                 .catch(error => {
@@ -1577,6 +1954,8 @@
                                     // 更新状态显示
                                     if (marketStatus && loadedCount + errorCount === pluginFiles.length) {
                                         marketStatus.textContent = `加载完成: ${loadedCount} 个插件${errorCount > 0 ? `, ${errorCount} 个失败` : ''}`;
+                                        // 添加插件市场搜索功能
+                                        this.addMarketSearchFunctionality();
                                     }
                                 });
                         }, index * 100); // 间隔100ms发起请求
@@ -1612,6 +1991,8 @@
                         <p>请检查插件仓库地址设置是否正确</p>
                     `;
                     pluginList.appendChild(errorState);
+                    // 添加插件市场搜索功能（即使加载失败也要添加，以便用户输入时不会出错）
+                    this.addMarketSearchFunctionality();
                 });
         },
         
@@ -1636,6 +2017,7 @@
         cdnAddress: 'https://fastly.jsdelivr.net/gh/RSPqfgn/XMWmax-plugins@main/plugins/',
         
         // 加载单个插件信息
+        // 加载单个插件信息
         loadMarketPluginInfo: function(downloadUrl, fileName) {
             // 如果提供的是相对路径，使用CDN地址补全
             if (downloadUrl && !downloadUrl.includes('://')) {
@@ -1649,7 +2031,13 @@
                 throw new Error(`无效的URL: ${downloadUrl}`);
             }
             
-            return fetch(downloadUrl)
+            // 添加超时功能的fetch
+            return Promise.race([
+                fetch(downloadUrl),
+                new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error(`请求超时: 无法访问插件 ${fileName}`)), 60000)
+                )
+            ])
                 .then(response => {
                     // 检查响应状态
                     if (!response.ok) {
@@ -1707,6 +2095,10 @@
         renderMarketPlugin: function(plugin, container) {
             const item = document.createElement('li');
             item.className = 'xmwmax-plugin-card';
+            // 添加数据属性用于搜索
+            item.dataset.name = plugin.name;
+            item.dataset.author = plugin.author;
+            item.dataset.description = plugin.description;
             
             // 检查插件是否已安装
             const isInstalled = this.plugins.some(p => 
@@ -1723,7 +2115,8 @@
                     <p class="xmwmax-plugin-description">${plugin.description}</p>
                     <div class="xmwmax-plugin-actions">
                         ${isInstalled ? 
-                            `<button class="xmwmax-btn xmwmax-installed-btn" disabled>已安装</button>` : 
+                            `<button class="xmwmax-btn xmwmax-installed-btn" disabled>已安装</button>
+                             <button class="xmwmax-btn xmwmax-btn-primary xmwmax-reinstall-btn" data-url="${plugin._downloadUrl}" data-filename="${plugin._fileName}">覆盖安装</button>` : 
                             `<button class="xmwmax-btn xmwmax-btn-primary xmwmax-install-btn" data-url="${plugin._downloadUrl}" data-filename="${plugin._fileName}">安装</button>`
                         }
                     </div>
@@ -1740,14 +2133,63 @@
                     const filename = e.target.dataset.filename;
                     this.installMarketPlugin(url, filename);
                 });
+            } else {
+                // 添加覆盖安装按钮事件监听器
+                const reinstallBtn = item.querySelector('.xmwmax-reinstall-btn');
+                reinstallBtn.addEventListener('click', (e) => {
+                    const url = e.target.dataset.url;
+                    const filename = e.target.dataset.filename;
+                    // 直接执行安装，无需确认
+                    this.installMarketPlugin(url, filename);
+                });
             }
+        },
+        
+        // 安装市场样式
+        installMarketStyle: function(downloadUrl, fileName) {
+            this.showNotification(`正在安装样式 ${fileName}...`, 'info');
+            
+            // 添加超时功能的fetch
+            Promise.race([
+                fetch(downloadUrl),
+                new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error(`请求超时: 无法下载样式 ${fileName}`)), 60000)
+                )
+            ])
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP错误! 状态: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(styleObj => {
+                    // 检查必需字段
+                    if (!styleObj.name || !styleObj.author || !styleObj.version || !styleObj.description) {
+                        throw new Error('样式缺少必要字段（name, author, version, description）');
+                    }
+                    
+                    // 检查init函数是否存在并处理不同格式
+                    if (!styleObj.init) {
+                        throw new Error('样式必须包含init函数');
+                    }
+                    
+                })
+                .catch(error => {
+                    this.showNotification(`安装样式 ${fileName} 失败: ${error.message}`, 'error');
+                });
         },
         
         // 安装市场插件
         installMarketPlugin: function(downloadUrl, fileName) {
             this.showNotification(`正在安装插件 ${fileName}...`, 'info');
             
-            fetch(downloadUrl)
+            // 添加超时功能的fetch
+            Promise.race([
+                fetch(downloadUrl),
+                new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error(`请求超时: 无法下载插件 ${fileName}`)), 60000)
+                )
+            ])
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`HTTP错误! 状态: ${response.status}`);
@@ -1764,7 +2206,6 @@
                     if (!pluginObj.init) {
                         throw new Error('插件必须包含init函数');
                     }
-                    
                     let initFunction;
                     if (typeof pluginObj.init === 'string') {
                         // 如果init是字符串，尝试解析为函数
@@ -1869,6 +2310,9 @@
                 this.plugins.forEach(plugin => {
                     const item = document.createElement('li');
                     item.className = 'xmwmax-plugin-card';
+                    item.dataset.name = plugin.name;
+                    item.dataset.author = plugin.author;
+                    item.dataset.description = plugin.description;
                     item.innerHTML = `
                         <div class="xmwmax-plugin-info">
                             <h3>${plugin.name}</h3>
@@ -1885,13 +2329,66 @@
                                 <button class="xmwmax-toggle-btn ${plugin.enabled ? '' : 'off'}" data-plugin="${plugin.name}" data-author="${plugin.author}">
                                     ${plugin.enabled ? '禁用' : '启用'}
                                 </button>
-                                <button class="xmwmax-edit-btn" data-plugin="${plugin.name}" data-author="${plugin.author}">编辑</button>
+                                <button class="xmwmax-edit-btn" data-plugin="${plugin.name}" data-author="${plugin.author}" style="display: ${GM_getValue('xmwmax_developer_mode', false) ? 'block' : 'none'}">编辑</button>
                                 <button class="xmwmax-delete-btn" data-plugin="${plugin.name}" data-author="${plugin.author}">删除</button>
                             </div>
                         </div>
                     `;
                     list.appendChild(item);
                 });
+                
+                // 添加已安装插件搜索功能
+                const searchInput = this.ui.querySelector('#installed-plugins-search');
+                if (searchInput) {
+                    searchInput.addEventListener('input', (e) => {
+                        const searchTerm = e.target.value.toLowerCase();
+                        const pluginCards = list.querySelectorAll('.xmwmax-plugin-card');
+                        
+                        pluginCards.forEach(card => {
+                            const name = card.dataset.name.toLowerCase();
+                            const author = card.dataset.author.toLowerCase();
+                            const description = card.dataset.description.toLowerCase();
+                            
+                            if (name.includes(searchTerm) || author.includes(searchTerm) || description.includes(searchTerm)) {
+                                card.classList.remove('hidden');
+                            } else {
+                                card.classList.add('hidden');
+                            }
+                        });
+                    });
+                }
+            }
+        },
+        
+        // 添加插件市场搜索功能
+        addMarketSearchFunctionality: function() {
+            const searchInput = this.ui.querySelector('#market-plugins-search');
+            const pluginList = this.ui.querySelector('.xmwmax-market-plugin-list');
+            
+            if (searchInput && pluginList) {
+                // 移除之前可能添加的事件监听器，避免重复绑定
+                searchInput.removeEventListener('input', this.marketSearchHandler);
+                
+                // 定义搜索处理函数
+                this.marketSearchHandler = (e) => {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const pluginCards = pluginList.querySelectorAll('.xmwmax-plugin-card');
+                    
+                    pluginCards.forEach(card => {
+                        const name = card.dataset.name.toLowerCase();
+                        const author = card.dataset.author.toLowerCase();
+                        const description = card.dataset.description.toLowerCase();
+                        
+                        if (name.includes(searchTerm) || author.includes(searchTerm) || description.includes(searchTerm)) {
+                            card.classList.remove('hidden');
+                        } else {
+                            card.classList.add('hidden');
+                        }
+                    });
+                };
+                
+                // 添加事件监听器
+                searchInput.addEventListener('input', this.marketSearchHandler);
             }
         },
         
@@ -1956,6 +2453,144 @@
                 }
             }
         },
+        
+        // 添加插件格式转换功能
+        addPluginConverterFunctionality: function(ui) {
+            // 转换为JSON格式
+            ui.querySelector('#convert-to-json').addEventListener('click', () => {
+                const input = ui.querySelector('#plugin-input').value;
+                const output = ui.querySelector('#plugin-output');
+                const copyButton = ui.querySelector('#copy-plugin-output');
+                
+                if (!input.trim()) {
+                    this.showNotification('请输入插件代码', 'error');
+                    return;
+                }
+                
+                try {
+                    // 尝试解析为JavaScript对象
+                    let pluginObj;
+                    try {
+                        // 先尝试作为JS对象解析（无引号属性名）
+                        pluginObj = eval(`(${input})`);
+                    } catch (jsError) {
+                        // 如果JS解析失败，尝试作为JSON解析
+                        try {
+                            pluginObj = JSON.parse(input);
+                        } catch (jsonError) {
+                            throw new Error('无法解析插件代码，请确保输入的是有效的JS或JSON格式');
+                        }
+                    }
+                    
+                    // 确保init函数正确处理
+                    if (typeof pluginObj.init === 'function') {
+                        pluginObj.init = pluginObj.init.toString();
+                    }
+                    
+                    // 输出格式化的JSON（带引号的属性名，值用双引号）
+                    output.value = JSON.stringify(pluginObj, null, 2);
+                    copyButton.classList.add('xmwmax-btn-primary');
+                    this.showNotification('转换为JSON格式成功', 'success');
+                } catch (error) {
+                    console.error('转换错误:', error);
+                    this.showNotification(`转换失败: ${error.message}`, 'error');
+                    output.value = '';
+                    copyButton.classList.remove('xmwmax-btn-primary');
+                }
+            });
+            
+            // 转换为JS格式
+            ui.querySelector('#convert-to-js').addEventListener('click', () => {
+                const input = ui.querySelector('#plugin-input').value;
+                const output = ui.querySelector('#plugin-output');
+                const copyButton = ui.querySelector('#copy-plugin-output');
+                
+                if (!input.trim()) {
+                    this.showNotification('请输入插件代码', 'error');
+                    return;
+                }
+                
+                try {
+                    // 尝试解析为JavaScript对象
+                    let pluginObj;
+                    try {
+                        // 先尝试作为JSON解析
+                        pluginObj = JSON.parse(input);
+                    } catch (jsonError) {
+                        // 如果JSON解析失败，尝试作为JS对象解析
+                        try {
+                            pluginObj = eval(`(${input})`);
+                        } catch (jsError) {
+                            throw new Error('无法解析插件代码，请确保输入的是有效的JS或JSON格式');
+                        }
+                    }
+                    
+                    // 处理init函数
+                    if (typeof pluginObj.init === 'string') {
+                        // 从字符串创建函数
+                        try {
+                            // 检查是否已经是完整函数定义
+                            if (pluginObj.init.trim().startsWith('function') || pluginObj.init.includes('=>')) {
+                                pluginObj.init = new Function(`return ${pluginObj.init}`)();
+                            } else {
+                                // 包装成函数
+                                pluginObj.init = new Function(pluginObj.init);
+                            }
+                        } catch (e) {
+                            // 保持为字符串
+                        }
+                    }
+                    
+                    // 手动构建JS格式输出（无引号属性名，字符串值用单引号）
+                    let jsOutput = '{\n';
+                    const keys = Object.keys(pluginObj);
+                    keys.forEach((key, index) => {
+                        const value = pluginObj[key];
+                        const isLast = index === keys.length - 1;
+                        
+                        if (key === 'init' && typeof value === 'function') {
+                            // 函数值保持原样
+                            jsOutput += `    ${key}: ${value.toString()}${isLast ? '' : ','}\n`;
+                        } else if (key === 'init' && typeof value === 'string') {
+                            // 字符串形式的函数
+                            jsOutput += `    ${key}: '${value.replace(/'/g, "\\'")}'${isLast ? '' : ','}\n`;
+                        } else if (typeof value === 'string') {
+                            // 字符串值用单引号
+                            jsOutput += `    ${key}: '${value.replace(/'/g, "\\'")}'${isLast ? '' : ','}\n`;
+                        } else if (typeof value === 'function') {
+                            // 函数值
+                            jsOutput += `    ${key}: ${value.toString()}${isLast ? '' : ','}\n`;
+                        } else {
+                            // 其他值用JSON序列化
+                            jsOutput += `    ${key}: ${JSON.stringify(value)}${isLast ? '' : ','}\n`;
+                        }
+                    });
+                    jsOutput += '}';
+                    
+                    output.value = jsOutput;
+                    copyButton.classList.add('xmwmax-btn-primary');
+                    this.showNotification('转换为JS格式成功', 'success');
+                } catch (error) {
+                    console.error('转换错误:', error);
+                    this.showNotification(`转换失败: ${error.message}`, 'error');
+                    output.value = '';
+                    copyButton.classList.remove('xmwmax-btn-primary');
+                }
+            });
+            
+            // 复制结果
+            ui.querySelector('#copy-plugin-output').addEventListener('click', () => {
+                const output = ui.querySelector('#plugin-output');
+                if (!output.value.trim()) {
+                    this.showNotification('没有内容可复制', 'error');
+                    return;
+                }
+                
+                output.select();
+                document.execCommand('copy');
+                this.showNotification('已复制到剪贴板', 'success');
+            });
+        }
     };
     
     // 暴露API到全局
